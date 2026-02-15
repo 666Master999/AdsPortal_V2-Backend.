@@ -1,25 +1,13 @@
-using AdsPortal_V2.Models;
+// Controllers/HomeController.cs
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace AdsPortal_V2.Controllers
 {
-    public class HomeController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class HomeController : ControllerBase
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        [HttpGet("status")]
+        public IActionResult Status() => Ok(new { service = "AdsPortal_V2", status = "ok" });
     }
 }
