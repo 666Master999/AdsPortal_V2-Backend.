@@ -6,9 +6,10 @@ namespace AdsPortal_V2.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController(IUserService users) : ControllerBase
+    public class AuthController(IUserService users, IJwtService jwt) : ControllerBase
     {
         private readonly IUserService _users = users;
+        private readonly IJwtService _jwt = jwt;
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -20,7 +21,7 @@ namespace AdsPortal_V2.Controllers
                 return Conflict("User already exists.");
 
             var user = await _users.RegisterAsync(dto);
-            var token = _users.GenerateJwtToken(user);
+            var token = _jwt.GenerateToken(user);
             return Ok(new { token });
         }
 
@@ -32,7 +33,7 @@ namespace AdsPortal_V2.Controllers
 
             var user = await _users.AuthenticateAsync(dto);
             if (user == null) return Unauthorized("Invalid credentials.");
-            var token = _users.GenerateJwtToken(user);
+            var token = _jwt.GenerateToken(user);
             return Ok(new { token });
         }
     }

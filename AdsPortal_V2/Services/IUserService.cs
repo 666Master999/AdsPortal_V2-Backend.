@@ -9,6 +9,7 @@ namespace AdsPortal_V2.Services
         Task<User?> AuthenticateAsync(LoginDto dto);
         Task<User> RegisterAsync(RegisterDto dto);
         Task<bool> UserExistsAsync(string login);
-        string GenerateJwtToken(User user);
+        Task<User> UpdateProfileAsync(int userId, AdsPortal_V2.DTOs.UpdateProfileDto dto);
+        Task ChangePasswordAsync(int userId, AdsPortal_V2.DTOs.ChangePasswordDto dto);
     }
 }

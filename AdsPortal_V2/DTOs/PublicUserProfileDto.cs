@@ -1,7 +1,8 @@
-﻿// Backend/DTOs/UserProfileDto.cs
+using System;
+
 namespace AdsPortal_V2.DTOs
 {
-    public class UserProfileDto
+    public class PublicUserProfileDto
     {
         public int Id { get; set; }
         public string Login { get; set; } = null!;

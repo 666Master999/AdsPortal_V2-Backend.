@@ -6,7 +6,8 @@ namespace AdsPortal_V2.Models
     public class User
     {
         [Key]
-        public Guid Id { get; set; }
+        [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         [Required, MaxLength(100)]
         public string Login { get; set; } = null!;
