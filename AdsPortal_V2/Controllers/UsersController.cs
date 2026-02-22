@@ -16,13 +16,38 @@ namespace AdsPortal_V2.Controllers
     {
         private readonly AdsPortalContext _db;
         private readonly AdsPortal_V2.Services.IUserService _users;
+        private readonly AdsPortal_V2.Services.IImageService _images;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(AdsPortalContext db, AdsPortal_V2.Services.IUserService users, ILogger<UsersController> logger)
+        public UsersController(AdsPortalContext db, AdsPortal_V2.Services.IUserService users, AdsPortal_V2.Services.IImageService images, ILogger<UsersController> logger)
         {
             _db = db;
             _users = users;
+            _images = images;
             _logger = logger;
+        }
+
+        // Upload avatar
+        [HttpPost("profile/avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile image)
+        {
+            if (!TryGetUserId(out var userId))
+                return Unauthorized();
+
+            if (image == null)
+                return BadRequest(new { error = "No image provided" });
+
+            try
+            {
+                await _images.SaveAvatarAsync(image, userId);
+                var avatarUrl = _images.GetAvatarPath(userId);
+                return Ok(new { avatarUrl });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading avatar for user {UserId}", userId);
+                return StatusCode(500, "Failed to upload avatar");
+            }
         }
 
         // Возвращает профиль текущего пользователя (полный)
@@ -34,18 +59,41 @@ namespace AdsPortal_V2.Controllers
 
             var user = await _db.Users
                 .AsNoTracking()
+                .Include(u => u.Ads)
                 .Where(u => u.Id == userId)
                 .Select(u => new UserProfileDto
                 {
                     Id = u.Id,
                     Login = u.Login,
+                    UserName = u.UserName,
                     Email = u.Email,
                     Phone = u.Phone,
-                    CreatedAt = u.CreatedAt
+                    CreatedAt = u.CreatedAt,
+                    AvatarUrl = null,
+                    Ads = u.Ads.Select(a => new AdDto
+                    {
+                        Id = a.Id,
+                        Type = a.Type,
+                        Title = a.Title,
+                        Description = a.Description,
+                        Price = a.Price,
+                        CreatedAt = a.CreatedAt,
+                        ImageUrls = new List<string>(),
+                        OwnerId = a.OwnerId,
+                        OwnerUserName = u.UserName
+                    }).ToList()
                 })
                 .SingleOrDefaultAsync();
 
-            return user is null ? NotFound() : Ok(user);
+            if (user is null) return NotFound();
+
+            user.AvatarUrl = _images.AvatarExists(userId) ? _images.GetAvatarPath(userId) : null;
+            foreach (var ad in user.Ads)
+            {
+                ad.ImageUrls = _images.GetAdImagePaths(userId, ad.Id);
+            }
+
+            return Ok(user);
         }
 
         // Получить профиль по id
@@ -65,35 +113,80 @@ namespace AdsPortal_V2.Controllers
             {
                 var full = await _db.Users
                     .AsNoTracking()
+                    .Include(u => u.Ads)
                     .Where(u => u.Id == id)
                     .Select(u => new UserProfileDto
                     {
                         Id = u.Id,
                         Login = u.Login,
+                        UserName = u.UserName,
                         Email = u.Email,
                         Phone = u.Phone,
-                        CreatedAt = u.CreatedAt
+                        CreatedAt = u.CreatedAt,
+                        AvatarUrl = null,
+                        Ads = u.Ads.Select(a => new AdDto
+                        {
+                            Id = a.Id,
+                            Type = a.Type,
+                            Title = a.Title,
+                            Description = a.Description,
+                            Price = a.Price,
+                            CreatedAt = a.CreatedAt,
+                            ImageUrls = new List<string>(),
+                            OwnerId = a.OwnerId,
+                            OwnerUserName = u.UserName
+                        }).ToList()
                     })
                     .SingleOrDefaultAsync();
 
-                return full is null ? NotFound() : Ok(full);
+                if (full is null) return NotFound();
+
+                full.AvatarUrl = _images.AvatarExists(id) ? _images.GetAvatarPath(id) : null;
+                foreach (var ad in full.Ads)
+                {
+                    ad.ImageUrls = _images.GetAdImagePaths(id, ad.Id);
+                }
+
+                return Ok(full);
             }
             else
             {
                 var pub = await _db.Users
                     .AsNoTracking()
+                    .Include(u => u.Ads)
                     .Where(u => u.Id == id)
                     .Select(u => new PublicUserProfileDto
                     {
                         Id = u.Id,
-                        Login = u.Login,
+                        UserName = u.UserName,
                         Email = u.Email,
                         Phone = u.Phone,
-                        CreatedAt = u.CreatedAt
+                        CreatedAt = u.CreatedAt,
+                        AvatarUrl = null,
+                        Ads = u.Ads.Select(a => new AdDto
+                        {
+                            Id = a.Id,
+                            Type = a.Type,
+                            Title = a.Title,
+                            Description = a.Description,
+                            Price = a.Price,
+                            CreatedAt = a.CreatedAt,
+                            ImageUrls = new List<string>(),
+                            OwnerId = a.OwnerId,
+                            OwnerUserName = u.UserName
+                        }).ToList()
                     })
                     .SingleOrDefaultAsync();
 
-                return pub is null ? NotFound() : Ok(pub);
+                if (pub is null) return NotFound();
+
+                pub.AvatarUrl = _images.AvatarExists(id) ? _images.GetAvatarPath(id) : null;
+                foreach (var ad in pub.Ads)
+                {
+                    ad.ImageUrls = _images.GetAdImagePaths(id, ad.Id);
+                }
+
+                return Ok(pub);
             }
         }
 
@@ -115,6 +208,7 @@ namespace AdsPortal_V2.Controllers
                 {
                     Id = updated.Id,
                     Login = updated.Login,
+                    UserName = updated.UserName,
                     Email = updated.Email,
                     Phone = updated.Phone,
                     CreatedAt = updated.CreatedAt

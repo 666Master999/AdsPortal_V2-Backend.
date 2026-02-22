@@ -9,8 +9,11 @@ namespace AdsPortal_V2.Models
         [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required, MinLength(3), MaxLength(50)]
         public string Login { get; set; } = null!;
+
+        [Required, MinLength(3), MaxLength(50)]
+        public string UserName { get; set; } = null!;
 
         [MaxLength(256)]
         public string? Email { get; set; }
@@ -26,5 +29,7 @@ namespace AdsPortal_V2.Models
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<Ad> Ads { get; set; } = new List<Ad>();
     }
 }

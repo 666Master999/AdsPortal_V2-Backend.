@@ -3,7 +3,6 @@ using AdsPortal_V2.Data;
 using AdsPortal_V2.Helpers;
 using AdsPortal_V2.Services;
 using AdsPortal_V2.Middleware;
-using AdsPortal_V2.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +24,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     {
         var errors = context.ModelState
             .Where(kvp => kvp.Value?.Errors?.Count > 0)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray());
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
 
         return new BadRequestObjectResult(new { errors });
     };
@@ -86,6 +85,8 @@ builder.Services.AddAuthentication(options =>
 
 // DI
 builder.Services.AddScoped<IUserService, UserService>();
+// Image service for uploads
+builder.Services.AddScoped<AdsPortal_V2.Services.IImageService, AdsPortal_V2.Services.ImageService>();
 
 // CORS policies
 builder.Services.AddCors(o =>

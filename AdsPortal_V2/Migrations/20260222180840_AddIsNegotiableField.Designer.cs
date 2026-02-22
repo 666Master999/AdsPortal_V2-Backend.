@@ -4,6 +4,7 @@ using AdsPortal_V2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdsPortal_V2.Migrations
 {
     [DbContext(typeof(AdsPortalContext))]
-    partial class AdsPortalContextModelSnapshot : ModelSnapshot
+    [Migration("20260222180840_AddIsNegotiableField")]
+    partial class AddIsNegotiableField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

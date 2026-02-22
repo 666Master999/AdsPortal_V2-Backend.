@@ -4,6 +4,7 @@ using AdsPortal_V2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AdsPortal_V2.Migrations
 {
     [DbContext(typeof(AdsPortalContext))]
-    partial class AdsPortalContextModelSnapshot : ModelSnapshot
+    [Migration("20260222153021_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,9 +39,6 @@ namespace AdsPortal_V2.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsNegotiable")
-                        .HasColumnType("bit");
-
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
@@ -57,35 +57,6 @@ namespace AdsPortal_V2.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Ads");
-                });
-
-            modelBuilder.Entity("AdsPortal_V2.Models.AdImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AdId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsMain")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AdId");
-
-                    b.ToTable("AdImages");
                 });
 
             modelBuilder.Entity("AdsPortal_V2.Models.User", b =>
@@ -144,22 +115,6 @@ namespace AdsPortal_V2.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("AdsPortal_V2.Models.AdImage", b =>
-                {
-                    b.HasOne("AdsPortal_V2.Models.Ad", "Ad")
-                        .WithMany("Images")
-                        .HasForeignKey("AdId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ad");
-                });
-
-            modelBuilder.Entity("AdsPortal_V2.Models.Ad", b =>
-                {
-                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("AdsPortal_V2.Models.User", b =>
