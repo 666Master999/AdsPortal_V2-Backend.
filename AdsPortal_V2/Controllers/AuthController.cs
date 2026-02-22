@@ -32,7 +32,7 @@ namespace AdsPortal_V2.Controllers
                 return BadRequest("Login and password required.");
 
             var user = await _users.AuthenticateAsync(dto);
-            if (user == null) return Unauthorized("Invalid credentials.");
+            if (user == null) return Unauthorized(new { error = "Неверный логин или пароль" });
             var token = _jwt.GenerateToken(user);
             return Ok(new { token });
         }

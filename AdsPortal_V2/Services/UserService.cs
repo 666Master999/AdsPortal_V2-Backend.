@@ -26,8 +26,8 @@ namespace AdsPortal_V2.Services
                 throw new KeyNotFoundException("User not found");
             }
 
-            if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email;
-            if (!string.IsNullOrWhiteSpace(dto.Phone)) user.Phone = dto.Phone;
+            user.Email = string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email;
+            user.Phone = string.IsNullOrWhiteSpace(dto.Phone) ? null : dto.Phone;
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
                 CreatePasswordHash(dto.Password, out var hash, out var salt);
@@ -84,8 +84,8 @@ namespace AdsPortal_V2.Services
             CreatePasswordHash(dto.Password, out var hash, out var salt);
             var user = new User
             {
-                // Id is database-generated identity
                 Login = dto.Login,
+                UserName = dto.Login,  // По умолчанию = Login, пользователь потом изменит
                 PasswordHash = hash,
                 PasswordSalt = salt,
                 CreatedAt = DateTime.UtcNow
@@ -106,14 +106,12 @@ namespace AdsPortal_V2.Services
         private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
         {
             salt = RandomNumberGenerator.GetBytes(_pwd.SaltSize);
-            using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, _pwd.Iterations, HashAlgorithmName.SHA256);
-            hash = pbkdf2.GetBytes(_pwd.KeySize);
+            hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, _pwd.Iterations, HashAlgorithmName.SHA256, _pwd.KeySize);
         }
 
         private bool VerifyPassword(string password, byte[] storedHash, byte[] storedSalt)
         {
-            using var pbkdf2 = new Rfc2898DeriveBytes(password, storedSalt, _pwd.Iterations, HashAlgorithmName.SHA256);
-            var computed = pbkdf2.GetBytes(storedHash.Length);
+            var computed = Rfc2898DeriveBytes.Pbkdf2(password, storedSalt, _pwd.Iterations, HashAlgorithmName.SHA256, storedHash.Length);
             return CryptographicOperations.FixedTimeEquals(computed, storedHash);
         }
     }
