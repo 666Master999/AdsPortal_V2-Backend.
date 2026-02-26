@@ -1,12 +1,19 @@
 ﻿// Models/User.cs
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AdsPortal_V2.Models
 {
+    public enum UserRole
+    {
+        User = 0,
+        Admin = 1
+    }
+
     public class User
     {
         [Key]
-        [System.ComponentModel.DataAnnotations.Schema.DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required, MinLength(3), MaxLength(50)]
@@ -30,6 +37,10 @@ namespace AdsPortal_V2.Models
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<Ad> Ads { get; set; } = new List<Ad>();
+        public UserRole Role { get; set; } = UserRole.User;
+
+        public bool IsBlocked { get; set; } = false;
+
+        public ICollection<Ad> Ads { get; set; } = [];
     }
 }

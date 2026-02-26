@@ -27,7 +27,8 @@ namespace AdsPortal_V2.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim("login", user.Login),
-                new Claim("uid", user.Id.ToString())
+                new Claim("uid", user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             var token = new JwtSecurityToken(

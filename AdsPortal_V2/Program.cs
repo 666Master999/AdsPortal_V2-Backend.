@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Text;
 
@@ -88,6 +89,12 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Image service for uploads
 builder.Services.AddScoped<AdsPortal_V2.Services.IImageService, AdsPortal_V2.Services.ImageService>();
 
+// Role-based authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
 // CORS policies
 builder.Services.AddCors(o =>
 {
@@ -102,6 +109,32 @@ builder.Services.AddCors(o =>
 });
 
 var app = builder.Build();
+
+// Применение миграций и сидирование пользователя admin/admin
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AdsPortalContext>();
+    db.Database.Migrate();
+
+    // Добавление пользователя admin/admin, если его нет
+    if (!db.Users.Any(u => u.Login == "admin"))
+    {
+        var pwdSettings = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<AdsPortal_V2.Helpers.PasswordSettings>>().Value;
+        var salt = System.Security.Cryptography.RandomNumberGenerator.GetBytes(pwdSettings.SaltSize);
+        var hash = System.Security.Cryptography.Rfc2898DeriveBytes.Pbkdf2(
+            "admin", salt, pwdSettings.Iterations, System.Security.Cryptography.HashAlgorithmName.SHA256, pwdSettings.KeySize);
+        db.Users.Add(new AdsPortal_V2.Models.User
+        {
+            Login = "admin",
+            UserName = "admin",
+            PasswordHash = hash,
+            PasswordSalt = salt,
+            Role = AdsPortal_V2.Models.UserRole.Admin,
+            CreatedAt = DateTime.UtcNow
+        });
+        db.SaveChanges();
+    }
+}
 
 // Global exception middleware (first in pipeline)
 app.UseMiddleware<ExceptionMiddleware>();

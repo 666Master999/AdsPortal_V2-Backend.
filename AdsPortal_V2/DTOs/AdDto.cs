@@ -10,9 +10,12 @@ namespace AdsPortal_V2.DTOs
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public decimal Price { get; set; }
-        public bool IsNegotiable { get; set; }  // Договорная цена
+        public bool IsNegotiable { get; set; }
+        public bool IsHidden { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<string> ImageUrls { get; set; } = new();
+        public DateTime? UpdatedAt { get; set; }
+        public List<AdImageDto> Images { get; set; } = [];
         public int OwnerId { get; set; }
         public string OwnerUserName { get; set; } = string.Empty;
     }

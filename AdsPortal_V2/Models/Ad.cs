@@ -18,13 +18,16 @@ namespace AdsPortal_V2.Models
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public bool IsNegotiable { get; set; } = false;  // Договорная цена
+        public bool IsHidden { get; set; } = false;       // Скрыто владельцем/админом
+        public bool IsDeleted { get; set; } = false;      // Soft-delete: помечено удалённым
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public int OwnerId { get; set; }
 
         [ForeignKey(nameof(OwnerId))]
         public User Owner { get; set; } = null!;
 
         // Images collection
-        public ICollection<AdImage> Images { get; set; } = new List<AdImage>();
+        public ICollection<AdImage> Images { get; set; } = [];
     }
 }
